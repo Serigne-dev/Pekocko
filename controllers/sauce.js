@@ -54,30 +54,74 @@ exports.likeSauce = (req, res, next) => {
   .then(sauce => {
     const aime = req.body.like;
     const idUser = req.body.userId;
+    console.log("aime: "+ aime);
     if (aime == 1){
-      sauce.usersLiked.push(idUser);
+       Sauce.updateOne(
+        { _id: req.params.id },
+        {
+          $inc: { likes: 1 },
+          $push: { usersLiked: idUser },
+        }
+      )
+        .then(() => {
+          res.status(201).json({ message: "Vote enregistré." });
+        })
+        .catch((error) => {
+          res.status(400).json({ error });
+        });
     }
     else if (aime == 0){
       //supression user du tableau de like
-      let indexLike = sauce.usersLiked.indexOf(userId);
-      if (indexLike > -1) {
-        sauce.usersLiked.splice(indexLike, 1);
+      if (sauce.usersLiked.find((user) => user === idUser)) {
+        Sauce.updateOne(
+              { _id: req.params.id },
+              {
+                $inc: { likes: -1 },
+                $pull: { usersLiked: idUser },
+              }
+            )
+              .then(() => {
+                res.status(201).json({ message: "Vote enregistré." });
+              })
+              .catch((error) => {
+                res.status(400).json({ error });
+              });
       }
       //supression user du tableau de dislike
-      let indexDislike = sauce.usersDisliked.indexOf(userId);
-      if (indexDislike > -1) {
-        sauce.usersDisliked.splice(indexDislike, 1);
+      if (sauce.usersDisliked.find((user) => user === idUser)) {
+        Sauce.updateOne(
+              { _id: req.params.id },
+              {
+                $inc: { dislikes: -1 },
+                $pull: { usersDisliked: idUser },
+              }
+            )
+              .then(() => {
+                res.status(201).json({ message: "Vote enregistré." });
+              })
+              .catch((error) => {
+                res.status(400).json({ error });
+              });
       }
     } 
     else if(aime == -1){
-      sauce.usersDisliked.push(idUser);
+      Sauce.updateOne(
+        { _id: req.params.id },
+        {
+          $inc: { dislikes: 1 },
+          $push: { usersDisliked: idUser },
+        }
+      )
+        .then(() => {
+          res.status(201).json({ message: "Vote enregistré." });
+        })
+        .catch((error) => {
+          res.status(400).json({ error });
+        });
     }
-    sauce.likes = sauce.usersLiked.length;
-    sauce.dislikes = sauce.usersDisliked.length;
-    //enregistrement de la sauce modifiée 
-    Sauce.updateOne({ _id: req.params.id }, { sauce, _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'Objet modifié !'}))
-    .catch(error => res.status(400).json({ error }));
+    else{
+      console.error("bad request");
+    }
     })
     .catch(error => res.status(500).json({ error }));
 };
