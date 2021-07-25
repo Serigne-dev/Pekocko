@@ -54,7 +54,6 @@ exports.likeSauce = (req, res, next) => {
   .then(sauce => {
     const aime = req.body.like;
     const idUser = req.body.userId;
-    console.log("aime: "+ aime);
     if (aime == 1){
        Sauce.updateOne(
         { _id: req.params.id },

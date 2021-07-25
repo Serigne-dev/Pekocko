@@ -3,8 +3,21 @@ const jwt = require('jsonwebtoken'); // pour créer et verifier les tokens
 
 const User = require('../models/User');
 
+function validationPassword(password){
+  if (password.match( /[0-9]/g) && 
+                    password.match( /[A-Z]/g) && 
+                    password.match(/[a-z]/g) && 
+                    password.match( /[^a-zA-Z\d]/g) &&
+                    password.length >= 8){
+             } 
+            else {
+                throw 'Mot de passe trop faible.'; } 
+}
+
 exports.signup = (req, res, next) => {
-	 bcrypt.hash(req.body.password, 10) //fonction hashage de bcrypt, mot de passe salé 10fois
+  try{
+    validationPassword(req.body.password);
+    bcrypt.hash(req.body.password, 10) //fonction hashage de bcrypt, mot de passe salé 10fois
     .then(hash => { // hash généré
       const user = new User({ //création utilisateur avec mot de passe haché
         email: req.body.email,
@@ -15,6 +28,10 @@ exports.signup = (req, res, next) => {
         .catch(error => res.status(400).json({ error }));
     })
     .catch(error => res.status(500).json({ error }));
+  }catch(e){
+    return res.status(401).json({e});
+  }
+	 
 };
 
 exports.login = (req, res, next) => {
