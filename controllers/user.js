@@ -30,10 +30,10 @@ exports.login = (req, res, next) => {
           }
           res.status(200).json({ //reponse 200 avec userID et token
             userId: user._id,
-            token: jwt.sign( // sgn de json web token pour encoder nouveau token
-              { userId: user._id },
-              'RANDOM_TOKEN_SECRET',
-              { expiresIn: '24h' }
+            token: jwt.sign( // sign de json web token pour encoder nouveau token
+              { userId: user._id },// token contient l'id user en tant que payload
+              'RANDOM_TOKEN_SECRET', //chaine secrete de developpement temporaire pour encoder le token
+              { expiresIn: '24h' } // durée de validité du token
             )
           });
         })

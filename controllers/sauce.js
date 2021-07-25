@@ -1,5 +1,5 @@
-const Sauce = require('../models/Sauce');
-const fs = require('fs');
+const Sauce = require('../models/Sauce'); // import de notre modele sauce
+const fs = require('fs');// file system, permet de modifier le systeme de fichiers (suppression)
 
 exports.getAllSauces = (req, res, next) => {
   Sauce.find()
@@ -9,15 +9,15 @@ exports.getAllSauces = (req, res, next) => {
 
 exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
-  .then(sauce => res.status(200).json(sauce))
-  .catch(error => res.status(404).json({ error }));
+  .then(sauce => res.status(200).json(sauce)) // envoi la sauce au front-end
+  .catch(error => res.status(404).json({ error })); // si sauce non trouvée envoi erreur 404 au front-end, avec l'erreur generée
 };
 
 exports.createSauce = (req, res, next) => {
-  const sauceObject = JSON.parse(req.body.sauce); 
+  const sauceObject = JSON.parse(req.body.sauce);// analyse de la chaine sauce pour la convertir en objet utilisable
   const sauce = new Sauce({
-    ...sauceObject,
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    ...sauceObject, // fais une copie de tous les elements de sauceObject
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`// resoud l'url
   });
   sauce.save()
   .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
@@ -26,11 +26,11 @@ exports.createSauce = (req, res, next) => {
 
 
 exports.modifySauce = (req, res, next) => {
-  const sauceObject = req.file ?
-  {
+  const sauceObject = req.file ? // regarder si req.file existe
+  { // l'iimage a été modifiée donc on traite la nouvelle image
     ...JSON.parse(req.body.sauce),
     imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-  } : { ...req.body };
+  } : { ...req.body };// l'image n'a pas été modifiée
   Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
   .then(() => res.status(200).json({ message: 'Objet modifié !'}))
   .catch(error => res.status(400).json({ error }));
@@ -39,8 +39,8 @@ exports.modifySauce = (req, res, next) => {
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id }) 
   .then(sauce => {
-    const filename = sauce.imageUrl.split('/images/')[1];
-    fs.unlink(`images/${filename}`, () => {
+    const filename = sauce.imageUrl.split('/images/')[1];// separe le nom du fichier avec le segement /image/
+    fs.unlink(`images/${filename}`, () => { // supprime le fichier
       Sauce.deleteOne({ _id: req.params.id })
       .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
       .catch(error => res.status(400).json({ error }));

@@ -1,6 +1,7 @@
-const http = require('http');
+const http = require('http'); // importation du package HTTP natif de node
 const app = require('./app');
 
+// rnvoie un port valide qu'il soit fourni sous la forme d'un numero ou d'une chaine
 const normalizePort = val => {
   const port = parseInt(val, 10);
 
@@ -15,6 +16,7 @@ const normalizePort = val => {
 const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
+// recherche les differentes erreurs et les gere de maniere appropriée
 const errorHandler = error => {
   if (error.syscall !== 'listen') {
     throw error;
