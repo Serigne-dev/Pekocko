@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt'); // package de chiffrement
 const jwt = require('jsonwebtoken'); // pour créer et verifier les tokens
-
 const User = require('../models/User');
+var CryptoJS = require("crypto-js"); // permet de crypter l'email
 
 function validationPassword(password){
   if (password.match( /[0-9]/g) && 
@@ -14,13 +14,14 @@ function validationPassword(password){
                 throw 'Mot de passe trop faible.'; } 
 }
 
+//pour que l'utilisateur s'inscrive
 exports.signup = (req, res, next) => {
   try{
     validationPassword(req.body.password);
     bcrypt.hash(req.body.password, 10) //fonction hashage de bcrypt, mot de passe salé 10fois
     .then(hash => { // hash généré
       const user = new User({ //création utilisateur avec mot de passe haché
-        email: req.body.email,
+        email: CryptoJS.MD5(req.body.email).toString(),
         password: hash
       });
       user.save() // enregistrement utilisateur
@@ -34,8 +35,9 @@ exports.signup = (req, res, next) => {
 	 
 };
 
+//pour que l'utilisateur se connecte
 exports.login = (req, res, next) => {
-	User.findOne({ email: req.body.email }) // verification email
+	User.findOne({ email: CryptoJS.MD5(req.body.email).toString() }) // verification email
     .then(user => {
       if (!user) {
         return res.status(401).json({ error: 'Utilisateur non trouvé !' });
